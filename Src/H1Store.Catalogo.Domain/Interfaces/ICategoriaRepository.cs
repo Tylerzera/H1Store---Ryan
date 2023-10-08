@@ -1,18 +1,26 @@
-﻿using H1Store.Catalogo.Domain.Entities;
+﻿using GestaoDeProduto.Domain.Etities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Domain.Interfaces
+namespace GestaoDeProduto.Domain.Interfaces
 {
     public interface ICategoriaRepository
     {
-        IEnumerable<Categoria> ObterTodos();
-        Categoria ObterPorCodigo(int codigo);
+        //public void Adicionar(Categoria novaCategoria);
+        //public Categoria BuscarPorId(int codigo);
+
+        //public IEnumerable<Categoria> BuscarTodos();
+        //public IEnumerable<Categoria> BuscarTodosAtivos();
+        //public IEnumerable<Categoria> BuscarTodosInativos();
+
+        Task<IEnumerable<Categoria>> ObterTodos();
+        Task<Categoria> ObterPorId(int id);
+        Task<IEnumerable<Categoria>> ObterPorCategoria(int codigo);
         void Adicionar(Categoria categoria);
-        void Atualizar(Categoria categoria);
-        void Remover(int codigo);
+        bool Atualizar(Categoria categoria);
+        bool Deletar(int id);
     }
 }

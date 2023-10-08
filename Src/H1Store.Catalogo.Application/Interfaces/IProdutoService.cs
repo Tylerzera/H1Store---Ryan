@@ -1,20 +1,20 @@
-﻿using H1Store.Catalogo.Application.ViewModels;
+﻿using LojaH1.Catalogo.Application.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Application.Interfaces
+namespace LojaH1.Catalogo.Application.Interface
 {
-	public interface IProdutoService
-	{
-		IEnumerable<ProdutoViewModel> ObterTodos();
-		Task<ProdutoViewModel> ObterPorId(Guid id);
-		Task<IEnumerable<ProdutoViewModel>> ObterPorCategoria(int codigo);
+    public interface IProdutoService
+    {
+        Task<IEnumerable<ProdutoViewModel>> ObterTodos();
+        Task<ProdutoViewModel> ObterPorId(int id);
+        Task<IEnumerable<ProdutoViewModel>> ObterPorCategoria(int codigo);
 
-		void Adicionar(NovoProdutoViewModel produto);
-		void Atualizar(ProdutoViewModel produto);
-		void RemoverProduto(int id);
-	}
+        void Adicionar(NovoProdutoViewModel novoProdutoViewModel);
+        bool Atualizar(NovoProdutoViewModel novoProdutoViewModel);
+        bool Deletar(int id);
+    }
 }

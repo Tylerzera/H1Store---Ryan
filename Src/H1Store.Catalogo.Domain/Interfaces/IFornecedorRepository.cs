@@ -1,18 +1,20 @@
-﻿using H1Store.Catalogo.Domain.Entities;
+﻿using GestaoDeProduto.Domain.Etities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Domain.Interfaces
+namespace GestaoDeProduto.Domain.Interfaces
 {
     public interface IFornecedorRepository
     {
-        IEnumerable<Fornecedor> ObterTodos();
-        Categoria ObterPorCodigo(int codigo);
+        Task<IEnumerable<Fornecedor>> ObterTodos();
+        Task<Fornecedor> ObterPorId(int id);
+        Task<IEnumerable<Fornecedor>> ObterPorCategoria(int codigo);
+
         void Adicionar(Fornecedor fornecedor);
-        void Atualizar(Fornecedor fornecedor);
-        void Remover(int codigo);
+        bool Atualizar(Fornecedor fornecedor);
+        bool Deletar(int id);
     }
 }

@@ -1,5 +1,5 @@
-﻿using H1Store.Catalogo.Domain.Entities;
-using H1Store.Catalogo.Domain.Interfaces;
+﻿using GestaoDeProduto.Domain.Etities;
+using GestaoDeProduto.Domain.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,83 +7,113 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Data.Repository
+namespace GestaoDeProduto.Data.Repositories
 {
     public class FornecedorRepository : IFornecedorRepository
     {
+
         private readonly string _fornecedorCaminhoArquivo;
 
+        #region Construtores
         public FornecedorRepository()
         {
             _fornecedorCaminhoArquivo = Path.Combine(Directory.GetCurrentDirectory(), "FileJsonData", "fornecedor.json");
         }
 
-        public async Task Adicionar(Fornecedor fornecedor)
+        #endregion
+
+        #region Funções do arquivo
+        public void Adicionar(Fornecedor fornecedor)
         {
-            var fornecedores = await LerFornecedoresDoArquivoAsync();
-            int proximoCodigo = ObterProximoCodigoDisponivel(fornecedores);
-            fornecedor.SetaCodigoFornecedor(proximoCodigo);
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
+            int proximoCodigo = ObterProximoCodigoDisponivel();
             fornecedores.Add(fornecedor);
-            await EscreverFornecedoresNoArquivoAsync(fornecedores);
+            EscreverFornecedorNoArquivo(fornecedores);
         }
 
-        public async Task Atualizar(Fornecedor fornecedor)
+        public bool Atualizar(Fornecedor fornecedor)
         {
-            var fornecedores = await LerFornecedoresDoArquivoAsync();
-            var fornecedorExistente = fornecedores.FirstOrDefault(f => f.Codigo == fornecedor.Codigo);
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
+            var fornecedorExistente = fornecedores.FirstOrDefault(p => p.Codigo == fornecedor.Codigo);
             if (fornecedorExistente != null)
             {
-                fornecedorExistente.RazaoSocial = fornecedor.RazaoSocial;
-                fornecedorExistente.CNPJ = fornecedor.CNPJ;
-                fornecedorExistente.Ativo = fornecedor.Ativo;
-                fornecedorExistente.DataCadastro = fornecedor.DataCadastro;
-                fornecedorExistente.EmailContato = fornecedor.EmailContato;
+                fornecedorExistente.AlterarRazaoSocial(fornecedor.RazaoSocial);
+                fornecedorExistente.AlterarEmailContato(fornecedor.EmailContato);
+
+                EscreverFornecedorNoArquivo(fornecedores);
+                return true;
             }
-            await EscreverFornecedoresNoArquivoAsync(fornecedores);
+            else
+            {
+                return false;
+            }
         }
 
-        public async Task<IEnumerable<Fornecedor>> ObterTodos()
+        public bool Deletar(int id)
         {
-            return await LerFornecedoresDoArquivoAsync();
-        }
-
-        public async Task<Fornecedor> ObterPorCodigo(int codigo)
-        {
-            var fornecedores = await LerFornecedoresDoArquivoAsync();
-            return fornecedores.FirstOrDefault(f => f.Codigo == codigo);
-        }
-
-        public async Task Remover(int codigo)
-        {
-            var fornecedores = await LerFornecedoresDoArquivoAsync();
-            var fornecedorExistente = fornecedores.FirstOrDefault(f => f.Codigo == codigo);
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
+            var fornecedorExistente = fornecedores.FirstOrDefault(p => p.Codigo == id);
             if (fornecedorExistente != null)
             {
                 fornecedores.Remove(fornecedorExistente);
-                await EscreverFornecedoresNoArquivoAsync(fornecedores);
+                EscreverFornecedorNoArquivo(fornecedores);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        private async Task<List<Fornecedor>> LerFornecedoresDoArquivoAsync()
+        public Task<IEnumerable<Fornecedor>> ObterPorCategoria(int codigo)
         {
-            if (!File.Exists(_fornecedorCaminhoArquivo))
+            throw new NotImplementedException();
+        }
+
+        public async Task<Fornecedor> ObterPorId(int id)
+        {
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
+            return await Task.FromResult(fornecedores.FirstOrDefault(p => p.Codigo == id));
+        }
+
+        public Task<IEnumerable<Fornecedor>> ObterTodos()
+        {
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
+            return Task.FromResult<IEnumerable<Fornecedor>>(fornecedores);
+        }
+
+        #endregion
+
+        #region Métodos do Arquivo
+        private List<Fornecedor> LerFornecedoresDoArquivo()
+        {
+            if (!System.IO.File.Exists(_fornecedorCaminhoArquivo))
+            {
                 return new List<Fornecedor>();
-            string json = await File.ReadAllTextAsync(_fornecedorCaminhoArquivo);
+            }
+
+            string json = System.IO.File.ReadAllText(_fornecedorCaminhoArquivo);
             return JsonConvert.DeserializeObject<List<Fornecedor>>(json);
         }
 
-        private int ObterProximoCodigoDisponivel(List<Fornecedor> fornecedores)
+        private int ObterProximoCodigoDisponivel()
         {
+            List<Fornecedor> fornecedores = LerFornecedoresDoArquivo();
             if (fornecedores.Any())
-                return fornecedores.Max(f => f.Codigo) + 1;
+            {
+                return fornecedores.Max(p => p.Codigo) + 1;
+            }
             else
+            {
                 return 1;
+            }
         }
 
-        private async Task EscreverFornecedoresNoArquivoAsync(List<Fornecedor> fornecedores)
+        private void EscreverFornecedorNoArquivo(List<Fornecedor> fornecedores)
         {
             string json = JsonConvert.SerializeObject(fornecedores);
-            await File.WriteAllTextAsync(_fornecedorCaminhoArquivo, json);
+            System.IO.File.WriteAllText(_fornecedorCaminhoArquivo, json);
         }
+        #endregion
     }
 }

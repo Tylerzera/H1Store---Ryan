@@ -1,11 +1,12 @@
-﻿using H1Store.Catalogo.Application.Interfaces;
-using H1Store.Catalogo.Application.ViewModels;
+﻿using LojaH1.Catalogo.Application.Interface;
+using LojaH1.Catalogo.Application.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace H1Store.Catalogo.API.Controllers
+
+namespace LOJAH1.Catalogo.API.Controllers
 {
     [ApiController]
-    [Route("api/categorias")]
+    [Route("api/[controller]")]
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaService _categoriaService;
@@ -16,46 +17,56 @@ namespace H1Store.Catalogo.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterTodasCategorias()
+        public async Task<IActionResult> Get()
         {
-            var categorias = await _categoriaService.ObterTodasCategorias();
+            var categorias = await _categoriaService.ObterTodos();
             return Ok(categorias);
         }
 
-        [HttpGet("{codigo}")]
-        public async Task<IActionResult> ObterCategoriaPorCodigo(int codigo)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            var categoria = await _categoriaService.ObterCategoriaPorCodigo(codigo);
-            if (categoria == null)
-            {
-                return NotFound();
-            }
+            var categoria = await _categoriaService.ObterPorId(id);
             return Ok(categoria);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarCategoria(NovaCategoriaViewModel novaCategoria)
+        public IActionResult Post(NovaCategoriaViewModel novoFornecedorViewModel)
         {
-            await _categoriaService.AdicionarCategoria(novaCategoria);
-            return CreatedAtAction(nameof(ObterCategoriaPorCodigo), new { codigo = novaCategoria.Codigo }, novaCategoria);
+            _categoriaService.Adicionar(novoFornecedorViewModel);
+            return Ok("Registro adicionado com sucesso!");
         }
 
-        [HttpPut("{codigo}")]
-        public async Task<IActionResult> AtualizarCategoria(int codigo, CategoriaViewModel categoria)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, NovaCategoriaViewModel novaCategoriaViewModel)
         {
-            if (codigo != categoria.Codigo)
+            novaCategoriaViewModel.Codigo = id;
+            bool atualizadoComSucesso = _categoriaService.Atualizar(novaCategoriaViewModel);
+
+            if (atualizadoComSucesso)
             {
-                return BadRequest();
+                return Ok("Registro atualizado com sucesso!");
             }
-            await _categoriaService.AtualizarCategoria(categoria);
-            return NoContent();
+            else
+            {
+                return NotFound("Registro inexistente ou não pôde ser atualizado.");
+            }
         }
 
-        [HttpDelete("{codigo}")]
-        public async Task<IActionResult> RemoverCategoria(int codigo)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            await _categoriaService.RemoverCategoria(codigo);
-            return NoContent();
+            bool excluidoComSucesso = _categoriaService.Deletar(id);
+
+            if (excluidoComSucesso)
+            {
+                return Ok("Registro excluído com sucesso!");
+            }
+            else
+            {
+                return NotFound("Registro não encontrado ou não pôde ser excluído.");
+            }
         }
     }
 }
+

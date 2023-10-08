@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Application.ViewModels
+namespace LojaH1.Catalogo.Application.ViewModel
 {
     public class NovaCategoriaViewModel
     {

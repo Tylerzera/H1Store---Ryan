@@ -1,18 +1,20 @@
-﻿using H1Store.Catalogo.Application.ViewModels;
+﻿using LojaH1.Catalogo.Application.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Application.Interfaces
+namespace LojaH1.Catalogo.Application.Interface
 {
     public interface IFornecedorService
     {
-        IEnumerable<FornecedorViewModel> ObterTodosFornecedor();
-        FornecedorViewModel ObterFornecedorPorCodigo(int codigo);
-        void AdicionarFornecedor(NovoFornecedorViewModel fornecedor);
-        void AtualizarFornecedor(FornecedorViewModel fornecedor);
-        void RemoverFornecedor(int codigo);
+        Task<IEnumerable<FornecedorViewModel>> ObterTodos();
+        Task<FornecedorViewModel> ObterPorId(int id);
+        Task<IEnumerable<FornecedorViewModel>> ObterPorCategoria(int codigo);
+
+        void Adicionar(NovoFornecedorViewModel novoFornecedor);
+        bool Atualizar(NovoFornecedorViewModel novoFornecedor);
+        bool Deletar(int id);
     }
 }

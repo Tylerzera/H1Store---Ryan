@@ -1,33 +1,75 @@
-﻿using H1Store.Catalogo.Application.Interfaces;
-using H1Store.Catalogo.Application.ViewModels;
+﻿using LojaH1.Catalogo.Application.Interface;
+using LojaH1.Catalogo.Application.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace H1Store.Catalogo.API.Controllers
+namespace LOJAH1.Catalogo.API.Controllers
 {
-	[ApiController]
-	[Route("[controller]")]
-	public class ProdutoController : ControllerBase
-	{
-		private readonly IProdutoService _produtoService;
 
-		public ProdutoController(IProdutoService produtoService)
-		{
-			_produtoService = produtoService;
-		}
+    [ApiController]
+    [Route("[controller]")]
+    public class ProdutoController : ControllerBase
+    {
+        private readonly IProdutoService _produtoService;
 
-		[HttpPost(Name = "Adicionar")]
-		public IActionResult Post(NovoProdutoViewModel novoProdutoViewModel)
-		{
-			_produtoService.Adicionar(novoProdutoViewModel);
+        public ProdutoController(IProdutoService produtoService)
+        {
+            _produtoService = produtoService;
+        }
 
-			return Ok();
-		}
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var produtos = await _produtoService.ObterTodos();
+            return Ok(produtos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var produto = await _produtoService.ObterPorId(id);
+            return Ok(produto);
+        }
+
+        [HttpPost]
+        public IActionResult Post(NovoProdutoViewModel novoProdutoViewModel)
+        {
+            _produtoService.Adicionar(novoProdutoViewModel);
+            return Ok("Registro adicionado com sucesso!");
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, NovoProdutoViewModel novoProdutoViewModel)
+        {
+            novoProdutoViewModel.Codigo = id;
+            bool atualizadoComSucesso = _produtoService.Atualizar(novoProdutoViewModel);
+
+            if (atualizadoComSucesso)
+            {
+                return Ok("Registro atualizado com sucesso!");
+            }
+            else
+            {
+                return NotFound("Registro inexistente ou não pôde ser atualizado.");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            bool excluidoComSucesso = _produtoService.Deletar(id);
+
+            if (excluidoComSucesso)
+            {
+                return Ok("Registro excluído com sucesso!");
+            }
+            else
+            {
+                return NotFound("Registro não encontrado ou não pôde ser excluído.");
+            }
+        }
 
 
-		[HttpGet(Name = "ObterTodos")]
-		public IActionResult Get()
-		{
-			return Ok(_produtoService.ObterTodos());
-		}
-	}
+
+    }
 }
+

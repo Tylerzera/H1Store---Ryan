@@ -1,18 +1,19 @@
 ﻿using AutoMapper;
-using H1Store.Catalogo.Application.Interfaces;
-using H1Store.Catalogo.Application.ViewModels;
-using H1Store.Catalogo.Domain.Entities;
-using H1Store.Catalogo.Domain.Interfaces;
+using GestaoDeProduto.Domain.Etities;
+using GestaoDeProduto.Domain.Interfaces;
+using LojaH1.Catalogo.Application.Interface;
+using LojaH1.Catalogo.Application.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Application.Services
+namespace LojaH1.Catalogo.Application.Services
 {
     public class FornecedorService : IFornecedorService
     {
+        #region Construtores
         private readonly IFornecedorRepository _fornecedorRepository;
         private IMapper _mapper;
 
@@ -21,39 +22,61 @@ namespace H1Store.Catalogo.Application.Services
             _fornecedorRepository = fornecedorRepository;
             _mapper = mapper;
         }
+        #endregion
 
-        public async Task AdicionarFornecedor(NovoFornecedorViewModel novoFornecedorViewModel)
+
+        #region Funções
+        public void Adicionar(NovoFornecedorViewModel novoFornecedorViewModel)
         {
             var novoFornecedor = _mapper.Map<Fornecedor>(novoFornecedorViewModel);
-            await _fornecedorRepository.Adicionar(novoFornecedor);
+            _fornecedorRepository.Adicionar(novoFornecedor);
         }
 
-        public async Task AtualizarFornecedor(FornecedorViewModel fornecedorViewModel)
+        public bool Atualizar(NovoFornecedorViewModel fornecedorViewModel)
         {
             var fornecedor = _mapper.Map<Fornecedor>(fornecedorViewModel);
-            await _fornecedorRepository.Atualizar(fornecedor);
+            bool atualizadoComSucesso = _fornecedorRepository.Atualizar(fornecedor);
+
+            if (atualizadoComSucesso)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public async Task<FornecedorViewModel> ObterFornecedorPorCodigo(int codigo)
+        public bool Deletar(int id)
         {
-            var fornecedor = await _fornecedorRepository.ObterPorCodigo(codigo);
-            return _mapper.Map<FornecedorViewModel>(fornecedor);
+            bool excluidoComSucesso = _fornecedorRepository.Deletar(id);
+
+            if (excluidoComSucesso)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public IEnumerable<FornecedorViewModel> ObterTodosFornecedor()
+        public Task<IEnumerable<FornecedorViewModel>> ObterPorCategoria(int codigo)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<FornecedorViewModel>> ObterTodosFornecedores()
+        public async Task<FornecedorViewModel> ObterPorId(int id)
+        {
+            var fornecedores = await _fornecedorRepository.ObterPorId(id);
+            return _mapper.Map<FornecedorViewModel>(fornecedores);
+        }
+
+        public async Task<IEnumerable<FornecedorViewModel>> ObterTodos()
         {
             var fornecedores = await _fornecedorRepository.ObterTodos();
             return _mapper.Map<IEnumerable<FornecedorViewModel>>(fornecedores);
         }
-
-        public async Task RemoverFornecedor(int codigo)
-        {
-            await _fornecedorRepository.Remover(codigo);
-        }
+        #endregion
     }
 }

@@ -4,17 +4,39 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Domain.Entities
+namespace GestaoDeProduto.Domain.Etities
 {
     public class Categoria
     {
+
+        #region Construtores
+        //public Categoria(int codigo, string descricao)
+        //{
+        //    Codigo = codigo;
+        //    descricao = descricao;
+
+        //}
         public Categoria(int codigo, string descricao)
         {
             Codigo = codigo;
             Descricao = descricao;
         }
 
+        #endregion
+
+        #region Propriedades
+
         public int Codigo { get; private set; }
         public string Descricao { get; private set; }
+
+        #endregion
+
+        #region Comportamentos
+        public void AlterarDescricao(string novaDescricao)
+        {
+            Descricao = novaDescricao;
+        }
+
+        #endregion
     }
 }

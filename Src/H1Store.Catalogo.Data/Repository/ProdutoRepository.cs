@@ -1,5 +1,5 @@
-﻿using H1Store.Catalogo.Domain.Entities;
-using H1Store.Catalogo.Domain.Interfaces;
+﻿using GestaoDeProduto.Domain.Etities;
+using GestaoDeProduto.Domain.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,91 +7,115 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Data.Repository
+
+namespace GestaoDeProduto.Data.Repositories
 {
-	public class ProdutoRepository : IProdutoRepository
-	{
+    public class ProdutoRepository : IProdutoRepository //neste momento vou falar o que eu preciso fazer
+    {
+        #region - Construtor
         private readonly string _produtoCaminhoArquivo;
 
         public ProdutoRepository()
         {
-             _produtoCaminhoArquivo = Path.Combine(Directory.GetCurrentDirectory(), "FileJsonData", "produto.json");
+            _produtoCaminhoArquivo = Path.Combine(Directory.GetCurrentDirectory(), "FileJsonData", "produto.json");
         }
 
-        public async Task Adicionar(Produto produto)
+        #endregion
+
+        #region - Funções do arquivo
+        public Task<IEnumerable<Produto>> ObterTodos()
         {
-             var produtos = await LerProdutosDoArquivoAsync();
-             int proximoCodigo = ObterProximoCodigoDisponivel(produtos);
-             produto.SetaCodigoProduto(proximoCodigo);
-             produtos.Add(produto);
-             await EscreverProdutosNoArquivoAsync(produtos);
+            List<Produto> produtos = LerProdutosDoArquivo();
+            return Task.FromResult<IEnumerable<Produto>>(produtos);
         }
 
-        public async Task Atualizar(Produto produto, Produto produtoExistente)
+        public async Task<Produto> ObterPorId(int id)
         {
-             var produtos = await LerProdutosDoArquivoAsync();
-             var produtoExistente = produtos.FirstOrDefault(p => p.Codigo == produto.Codigo);
-             if (produtoExistente != null)
-             {
-                 produtoExistente.Nome = produto.Nome;
-                 produtoExistente.Descricao = produto.Descricao;
-                 produtoExistente.Ativo = produto.Ativo;
-                 produtoExistente.Valor = produto.Valor;
-                 produtoExistente.DataCadastro = produto.DataCadastro;
-                 produtoExistente.Imagem = produto.Imagem;
-                 produtoExistente.QuantidadeEstoque = produto.QuantidadeEstoque;
-             }
-             await EscreverProdutosNoArquivoAsync(produtos);
+            List<Produto> produtos = LerProdutosDoArquivo();
+            return await Task.FromResult(produtos.FirstOrDefault(p => p.Codigo == id));
         }
 
-        public async Task<IEnumerable<Produto>> ObterTodos()
+        public Task<IEnumerable<Produto>> ObterPorCategoria(int codigo)
         {
-             return await LerProdutosDoArquivoAsync();
+            //List<Produto> produtos = LerProdutosDoArquivo();
+            //return produtos.Where(p => p.CategoriaCodigo == codigo);
+            throw new NotImplementedException();
         }
 
-        public async Task<Produto> ObterPorId(Guid id)
+        public void Adicionar(Produto novoproduto)
         {
-             var produtos = await LerProdutosDoArquivoAsync();
-             return produtos.FirstOrDefault(p => p.Id == id);
+            //List<Produto> produtos = new List<Produto>();
+            List<Produto> produtos = LerProdutosDoArquivo();
+            int proximoCodigo = ObterProximoCodigoDisponivel();
+            produtos.Add(novoproduto);
+            EscreverProdutosNoArquivo(produtos);
         }
 
-        public async Task<IEnumerable<Produto>> ObterPorCategoria(int codigo)
+        public bool Atualizar(Produto produto)
         {
-             var produtos = await LerProdutosDoArquivoAsync();
-             return produtos.Where(p => p.Categoria.Codigo == codigo);
+            List<Produto> produtos = LerProdutosDoArquivo();
+            var produtoExistente = produtos.FirstOrDefault(p => p.Codigo == produto.Codigo);
+            if (produtoExistente != null)
+            {
+                produtoExistente.AlterarNome(produto.Nome);
+                produtoExistente.AlterarDescricao(produto.Descricao);
+                EscreverProdutosNoArquivo(produtos);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public async Task Remover(int codigo)
+        public bool Deletar(int id)
         {
-             var produtos = await LerProdutosDoArquivoAsync();
-             var produtoExistente = produtos.FirstOrDefault(p => p.Codigo == codigo);
-             if (produtoExistente != null)
-             {
-                    produtos.Remove(produtoExistente);
-                    await EscreverProdutosNoArquivoAsync(produtos);
-             }
+            List<Produto> produtos = LerProdutosDoArquivo();
+            var produtoExistente = produtos.FirstOrDefault(p => p.Codigo == id);
+            if (produtoExistente != null)
+            {
+                produtos.Remove(produtoExistente);
+                EscreverProdutosNoArquivo(produtos);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region Métodos do arquivo
+        private List<Produto> LerProdutosDoArquivo()
+        {
+            if (!System.IO.File.Exists(_produtoCaminhoArquivo))
+            {
+                return new List<Produto>();
+            }
+
+            string json = System.IO.File.ReadAllText(_produtoCaminhoArquivo);
+            return JsonConvert.DeserializeObject<List<Produto>>(json);
         }
 
-        private async Task<List<Produto>> LerProdutosDoArquivoAsync()
+        private int ObterProximoCodigoDisponivel()
         {
-             if (!File.Exists(_produtoCaminhoArquivo))
-             return new List<Produto>();
-             string json = await File.ReadAllTextAsync(_produtoCaminhoArquivo);
-             return JsonConvert.DeserializeObject<List<Produto>>(json);
+            List<Produto> produtos = LerProdutosDoArquivo();
+            if (produtos.Any())
+            {
+                return produtos.Max(p => p.Codigo) + 1;
+            }
+            else
+            {
+                return 1;
+            }
         }
 
-        private int ObterProximoCodigoDisponivel(List<Produto> produtos)
+        private void EscreverProdutosNoArquivo(List<Produto> produtos)
         {
-             if (produtos.Any())
-             return produtos.Max(p => p.Codigo) + 1;
-             else
-             return 1;
+            string json = JsonConvert.SerializeObject(produtos);
+            System.IO.File.WriteAllText(_produtoCaminhoArquivo, json);
         }
 
-        private async Task EscreverProdutosNoArquivoAsync(List<Produto> produtos)
-        {
-             string json = JsonConvert.SerializeObject(produtos);
-             await File.WriteAllTextAsync(_produtoCaminhoArquivo, json);
-        }
+        #endregion
     }
 }

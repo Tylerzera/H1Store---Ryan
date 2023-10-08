@@ -1,67 +1,100 @@
-﻿using H1Store.Catalogo.Domain.ValueObjects;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace H1Store.Catalogo.Domain.Entities
+namespace GestaoDeProduto.Domain.Etities
 {
-	public class Produto
-	{
+    //entities - entidades
+    public class Produto
+    {
 
-		#region 1 - Contrutores
-		public Produto(int codigo, string nome, string descricao, bool ativo, decimal valor, DateTime dataCadastro, string imagem, int quantidadeEstoque)
-		{
-			Codigo = codigo;
-			Nome = nome;
-			Descricao = descricao;
-			Ativo = ativo;
-			Valor = valor;
-			DataCadastro = dataCadastro;
-			Imagem = imagem;
-			QuantidadeEstoque = quantidadeEstoque;
-		}
+        #region Construtores
+        // primeiro construtor que excluir
+        //public Produto(int codigo, string nome, int qtdeEstoque, DateTime dataCadastro, bool ativo)
+        //{
+        //    //this.Codigo = codigo;
+        //    //this.Nome = nome;
+        //    //this.QtdeEstoque = qtdeEstoque;
+        //    //this.DataCadastro = dataCadastro;
+        //    //this.Ativo = ativo;
+        //}
+
+        //segundo construtor que excluí
+        //public Produto(int codigo, string nome, int qtdeEstoque, DateTime dataCadastro, bool ativo)
+        //{
+        //    Codigo = codigo;
+        //    Nome = nome;
+        //    QtdeEstoque = qtdeEstoque;
+        //    DataCadastro = dataCadastro;
+        //    Ativo = ativo;
+        //}
+
+        public Produto(int codigo, string nome, string descricao, bool ativo, decimal valor, DateTime dataCadastro, int estoque)
+        {
+            Codigo = codigo;
+            Nome = nome;
+            Descricao = descricao;
+            Ativo = ativo;
+            Valor = valor;
+            DataCadastro = dataCadastro;
+            Estoque = estoque;
+        }
+
+        #endregion
 
 
-		#endregion
 
-		#region 2 - Propriedades
-		public int Codigo { get; private set; }
-			public string Nome { get; private set; }
-			public string Descricao { get; private set; }
-			public bool Ativo { get; private set; }
-			public decimal Valor { get; private set; }
-			public DateTime DataCadastro { get; private set; }
-			public string Imagem { get; private set; }
-			public int QuantidadeEstoque { get; private set; }
+        #region Propriedades
 
-		#endregion
+        public int Codigo { get; private set; }
+        public string Nome { get; private set; }
+        public string Descricao { get; private set; }
+        public bool Ativo { get; private set; }
+        public decimal Valor { get; private set; }
+        public DateTime DataCadastro { get; private set; }
+        public int Estoque { get; private set; }
 
-		#region 3 - Comportamentos
+        #endregion
 
-		public void Ativar() => Ativo = true;
+        #region Funções
 
-		public void Desativar() => Ativo = false;
+        public void Ativar()
+        {
+            Ativo = true;
+        }
 
-		public void AlterarDescricao(string descricao) => Descricao = descricao;
+        public void Desativar()
+        {
+            Ativo = false;
+        }
 
-		public void DebitarEstoque(int quantidade)
-		{
-			if (!PossuiEstoque(quantidade)) throw new Exception("Estoque insuficiente");
-			QuantidadeEstoque -= quantidade;
-		}
+        public void AlterarDescricao(string novaDescricao)
+        {
+            Descricao = novaDescricao;
+        }
 
-		public void ReporEstoque(int quantidade)
-		{
-			QuantidadeEstoque += quantidade;
-		}
+        public void AlterarNome(string novoNome)
+        {
+            Nome = novoNome;
+        }
 
-		public bool PossuiEstoque(int quantidade) => QuantidadeEstoque >= quantidade;
+        public void AdicionarEstoque(int quantidade)
+        {
+            Estoque += quantidade;
+        }
 
-		public void SetaCodigoProduto(int novocodigo) => Codigo = novocodigo;
+        public void BaixarEstoque(int quantidade)
+        {
+            if (quantidade < 0) quantidade *= -1;
+            if (!PossuiEstoque(quantidade)) throw new Exception("Estoque insuficiente");
+            Estoque -= quantidade;
+        }
+        public bool PossuiEstoque(int quantidade) => Estoque >= quantidade;
 
-		#endregion
-	}
+
+        #endregion
+    }
 }

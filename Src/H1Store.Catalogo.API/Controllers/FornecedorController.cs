@@ -1,12 +1,13 @@
-﻿using AutoMapper;
-using H1Store.Catalogo.Application.Interfaces;
-using H1Store.Catalogo.Application.ViewModels;
+﻿
+using LojaH1.Catalogo.Application.Interface;
+using LojaH1.Catalogo.Application.Services;
+using LojaH1.Catalogo.Application.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
-namespace H1Store.Catalogo.API.Controllers
+namespace LOJAH1.Catalogo.API.Controllers
 {
     [ApiController]
-    [Route("api/fornecedores")]
+    [Route("[controller]")]
     public class FornecedorController : ControllerBase
     {
         private readonly IFornecedorService _fornecedorService;
@@ -17,46 +18,55 @@ namespace H1Store.Catalogo.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterTodosFornecedores()
+        public async Task<IActionResult> Get()
         {
-            var fornecedores = await _fornecedorService.ObterTodosFornecedores();
+            var fornecedores = await _fornecedorService.ObterTodos();
             return Ok(fornecedores);
         }
 
-        [HttpGet("{codigo}")]
-        public async Task<IActionResult> ObterFornecedorPorCodigo(int codigo)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            var fornecedor = await _fornecedorService.ObterFornecedorPorCodigo(codigo);
-            if (fornecedor == null)
-            {
-                return NotFound();
-            }
+            var fornecedor = await _fornecedorService.ObterPorId(id);
             return Ok(fornecedor);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AdicionarFornecedor(NovoFornecedorViewModel novoFornecedor)
+        public IActionResult Post(NovoFornecedorViewModel novoFornecedorViewModel)
         {
-            await _fornecedorService.AdicionarFornecedor(novoFornecedor);
-            return CreatedAtAction(nameof(ObterFornecedorPorCodigo), new { codigo = novoFornecedor.Codigo }, novoFornecedor);
+            _fornecedorService.Adicionar(novoFornecedorViewModel);
+            return Ok("Registro adicionado com sucesso!");
         }
 
-        [HttpPut("{codigo}")]
-        public async Task<IActionResult> AtualizarFornecedor(int codigo, FornecedorViewModel fornecedor)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, NovoFornecedorViewModel novoFornecedorViewModel)
         {
-            if (codigo != fornecedor.Codigo)
+            novoFornecedorViewModel.Codigo = id;
+            bool atualizadoComSucesso = _fornecedorService.Atualizar(novoFornecedorViewModel);
+
+            if (atualizadoComSucesso)
             {
-                return BadRequest();
+                return Ok("Registro atualizado com sucesso!");
             }
-            await _fornecedorService.AtualizarFornecedor(fornecedor);
-            return NoContent();
+            else
+            {
+                return NotFound("Registro inexistente ou não pôde ser atualizado.");
+            }
         }
 
-        [HttpDelete("{codigo}")]
-        public async Task<IActionResult> RemoverFornecedor(int codigo)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            await _fornecedorService.RemoverFornecedor(codigo);
-            return NoContent();
+            bool excluidoComSucesso = _fornecedorService.Deletar(id);
+
+            if (excluidoComSucesso)
+            {
+                return Ok("Registro excluído com sucesso!");
+            }
+            else
+            {
+                return NotFound("Registro não encontrado ou não pôde ser excluído.");
+            }
         }
     }
 }
